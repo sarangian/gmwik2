@@ -45,33 +45,6 @@ def rm_r(path):
   elif os.path.exists(path):
       os.remove(path)
 
-def repair_reads(args):
-  spinner = Halo(text="Re-pairing reads", spinner=spin)
-  spinner.start()
-  command = [
-    "repair.sh",
-    f"in1={args.forward},
-    f"in2={args.output_prefix}_in2.fastq",
-    f"out1={args.output_prefix}_repaired1.fastq",
-    f"out2={args.output_prefix}_repaired2.fastq",
-    "outs=/dev/null"
-  ]
-  proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  stderr = proc.stderr.read().decode("utf-8") 
-  proc.communicate()
-
-  if proc.returncode != 0:
-    spinner.fail()
-    printw(stderr)
-    printr("GMWI2 aborted " + poop)
-    sys.exit()
-
-  spinner.succeed()
-
-  # remove input
-  rm_r(f"{args.output_prefix}_in1.fastq")
-  rm_r(f"{args.output_prefix}_in2.fastq")
-
 def overrepresented(args):
   spinner = Halo(text="Extracting overrepresented sequences", spinner=spin)
   spinner.start()
@@ -80,7 +53,7 @@ def overrepresented(args):
 
   command = [
     "fastqc",
-    f"{args.output_prefix}_repaired1.fastq",
+    f"{args.forward}",
     "--extract",
     "--delete",
     "-o",
@@ -98,7 +71,7 @@ def overrepresented(args):
 
   command = [
     "fastqc",
-    f"{args.output_prefix}_repaired2.fastq",
+    f"{args.reverse}",
     "--extract",
     "--delete",
     "-o",
