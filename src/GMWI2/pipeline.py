@@ -45,37 +45,12 @@ def rm_r(path):
   elif os.path.exists(path):
       os.remove(path)
 
-def copy_input(args):
-  spinner = Halo(text="Extracting/copying fastq files", spinner=spin)
-  spinner.start()
-
-  # copy and optionally extract input files
-  forward = f"{args.output_prefix}_in1.fastq"
-  reverse = f"{args.output_prefix}_in2.fastq"
-
-  try:
-    for user_input, target in [(args.forward, forward), (args.reverse, reverse)]:
-      if user_input.endswith(".fastq.gz"):
-        with gzip.open(user_input, 'rb') as f_in:
-            with open(target, 'wb') as f_out:
-                shutil.copyfileobj(f_in, f_out)
-      else:
-        shutil.copy(user_input, target)
-  except Exception as e:
-    error = traceback.format_exc()
-    spinner.fail()
-    printw(error)
-    printr("GMWI2 aborted " + poop)
-    sys.exit()
-
-  spinner.succeed()
-
 def repair_reads(args):
   spinner = Halo(text="Re-pairing reads", spinner=spin)
   spinner.start()
   command = [
     "repair.sh",
-    f"in1={args.output_prefix}_in1.fastq",
+    f"in1={args.forward},
     f"in2={args.output_prefix}_in2.fastq",
     f"out1={args.output_prefix}_repaired1.fastq",
     f"out2={args.output_prefix}_repaired2.fastq",
